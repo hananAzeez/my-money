@@ -33,7 +33,7 @@ const TransactionForm = ({ uid }) => {
           />
         </label>
         <label>
-          <span>Amount ($):</span>
+          <span>Amount (₹):</span>
           <input
             type="number"
             onChange={(e) => setAmount(e.target.value)}
