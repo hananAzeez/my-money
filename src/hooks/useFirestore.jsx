@@ -1,4 +1,4 @@
-import { getDoc, collection } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { useState, useEffect, useReducer } from "react";
 import { db, timestamp } from "../firebase/config";
 
@@ -32,13 +32,13 @@ const firestoreReducer = (state, action) => {
   }
 };
 
-export const useFirestore = (collection) => {
+export const useFirestore = (collectionName) => {
   const [response, dispatch] = useReducer(firestoreReducer, initialState);
   const [isCancelled, setIsCancelled] = useState(false);
 
   //collection ref
-  //   const colRef = collection(db,);
-  const ref = db.collection(collection);
+  const colRef = collection(db, "transactions");
+  // const ref = db.collection(collection);
 
   const dispatchIfNotCancelled = (action) => {
     if (!isCancelled) {
@@ -52,7 +52,8 @@ export const useFirestore = (collection) => {
 
     try {
       const createdAt = timestamp.fromDate(new Date());
-      const addedDocument = await ref.add(...doc, createdAt);
+      // const addedDocument = await ref.add(...doc, createdAt);
+      const addedDocument = addDoc(colRef, { ...doc, createdAt });
       dispatchIfNotCancelled({
         type: "ADDED_DOCUMENTS",
         payload: addedDocument,
@@ -65,9 +66,9 @@ export const useFirestore = (collection) => {
   //delete a document
   const deleteDocument = () => {};
 
-  useEffect(() => {
-    return () => setIsCancelled(true);
-  }, []);
+  // useEffect(() => {
+  //   return () => setIsCancelled(true);
+  // }, []);
 
   return { addDocument, deleteDocument, response };
 };
