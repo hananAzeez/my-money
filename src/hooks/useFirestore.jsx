@@ -1,4 +1,4 @@
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { useState, useEffect, useReducer } from "react";
 import { db, timestamp } from "../firebase/config";
 
@@ -14,6 +14,13 @@ const firestoreReducer = (state, action) => {
     case "IS_PENDING":
       return { document: null, isPending: true, error: null, success: null };
     case "ADDED_DOCUMENTS":
+      return {
+        document: action.payload,
+        isPending: false,
+        error: null,
+        success: true,
+      };
+    case "DELETED_DOCUMENTS":
       return {
         document: action.payload,
         isPending: false,
@@ -53,7 +60,7 @@ export const useFirestore = (collectionName) => {
     try {
       const createdAt = timestamp.fromDate(new Date());
       // const addedDocument = await ref.add(...doc, createdAt);
-      const addedDocument = addDoc(colRef, { ...doc, createdAt });
+      const addedDocument = await addDoc(colRef, { ...doc, createdAt });
       dispatchIfNotCancelled({
         type: "ADDED_DOCUMENTS",
         payload: addedDocument,
@@ -64,11 +71,30 @@ export const useFirestore = (collectionName) => {
   };
 
   //delete a document
-  const deleteDocument = () => {};
+  const deleteDocument = async (id) => {
+    dispatch({ type: "LOADING" });
 
-  // useEffect(() => {
-  //   return () => setIsCancelled(true);
-  // }, []);
+    try {
+      const docRef = doc(db, collectionName, id);
+      const deletedDocument = await deleteDoc(docRef);
+      dispatchIfNotCancelled({
+        type: "DELETED_DOCUMENT",
+        payload: deletedDocument,
+      });
+    } catch (err) {
+      dispatchIfNotCancelled({
+        type: "ERROR",
+        payload: "could not delete the document",
+      });
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      setIsCancelled(true);
+      console.log("cleaned up useFirestore");
+    };
+  }, []);
 
   return { addDocument, deleteDocument, response };
 };
