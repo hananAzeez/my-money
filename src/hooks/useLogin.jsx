@@ -20,20 +20,21 @@ export const useLogin = () => {
       dispatch({ type: "LOGIN", payload: user });
 
       //update state
-      // if (!isCancelled) {
-      setError(null);
-      setIsPending(false);
-      // }
-    } catch (err) {
       if (!isCancelled) {
-        console.log(err);
-        setError(err);
+        setError(null);
+        setIsPending(false);
+      }
+    } catch (err) {
+      console.log("isCancelled", isCancelled);
+      if (isCancelled) {
+        setError("Something went wrong, Try again!");
         setIsPending(false);
       }
     }
   };
 
   useEffect(() => {
+    console.log("called");
     return () => {
       console.log("cleanup login");
       setIsCancelled(true);
